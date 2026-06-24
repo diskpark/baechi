@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>현장배치 현황판</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a}
+.wrap{padding:12px;max-width:420px;margin:0 auto}
+.top-bar{display:flex;align-items:center;justify-content:center;position:relative;padding:10px 0 2px}
+.app-title{font-size:20px;font-weight:600;color:#1a1a1a}
+.version-badge{display:inline-block;background:#e8f0fe;color:#1a73e8;font-size:11px;padding:2px 8px;border-radius:6px;margin-left:6px;vertical-align:middle}
+.sub-title{font-size:12px;color:#888;text-align:center;padding:2px 0 10px}
+.settings-btn{position:absolute;right:0;top:10px;background:none;border:none;cursor:pointer;color:#888;font-size:22px;line-height:1}
+.settings-panel{display:none;background:#f0f0f0;border-radius:12px;padding:14px;margin-bottom:12px;border:0.5px solid #ddd}
+.settings-panel.show{display:block}
+.settings-panel label{font-size:12px;color:#666;display:block;margin-bottom:4px;margin-top:10px}
+.settings-panel label:first-child{margin-top:0}
+.settings-panel input{width:100%;font-size:13px;padding:8px 12px;border:0.5px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a}
+.sync-bar{display:flex;gap:8px;margin-top:12px}
+.sync-btn{flex:1;padding:9px;font-size:13px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer}
+.sync-btn:active{background:#f0f0f0}
+.sync-msg{font-size:12px;color:#888;text-align:center;margin-top:6px;min-height:16px}
+.tab-bar{display:flex;border-bottom:0.5px solid #ddd;margin-bottom:12px}
+.tab{flex:1;text-align:center;padding:10px 4px;font-size:14px;cursor:pointer;color:#888;border-bottom:2px solid transparent}
+.tab.active{color:#1a1a1a;border-bottom:2px solid #1a1a1a;font-weight:500}
+.section{display:none}
+.section.active{display:block}
+.matrix-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.matrix{width:100%;border-collapse:collapse;font-size:11px}
+.matrix th{background:#f0f0f0;padding:7px 3px;text-align:center;font-weight:500;font-size:10px;color:#666;border:0.5px solid #ddd;white-space:nowrap}
+.matrix td{padding:5px 2px;text-align:center;border:0.5px solid #ddd;font-size:10px;white-space:nowrap;background:#fff}
+.matrix td.rh{background:#f0f0f0;font-weight:500;font-size:11px;color:#1a1a1a;padding:5px 6px}
+.card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.site-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:10px 12px}
+.site-name{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px;border-bottom:0.5px solid #eee;padding-bottom:5px}
+.card-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;color:#666}
+.dg{background:#EAF3DE;color:#3B6D11;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
+.dy{background:#FAEEDA;color:#854F0B;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
+.dr{background:#FCEBEB;color:#A32D2D;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
+.dn{background:#f0f0f0;color:#999;padding:2px 6px;border-radius:6px;font-size:10px}
+.input-section{margin-top:16px;border-top:0.5px solid #ddd;padding-top:14px}
+.lock-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.lock-bar input{flex:1;font-size:14px;padding:9px 12px;border:0.5px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a}
+.lock-bar button{padding:9px 16px;font-size:13px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer;white-space:nowrap}
+.unlocked{display:none}
+.unlocked.show{display:block}
+.date-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.date-row label{font-size:13px;color:#666;white-space:nowrap}
+.date-row input{flex:1;font-size:14px;padding:9px 12px;border:0.5px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a}
+.cho-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cho-btn{padding:14px 8px;font-size:17px;font-weight:600;border:0.5px solid #ccc;border-radius:12px;background:#fff;color:#1a1a1a;cursor:pointer;text-align:center}
+.cho-btn:active{background:#f0f0f0}
+.save-msg{font-size:12px;color:#888;text-align:center;margin-top:8px;min-height:16px}
+.popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:flex-start;justify-content:center;padding-top:80px;z-index:100}
+.popup-overlay.show{display:flex}
+.popup-box{background:#fff;border-radius:16px;width:92%;max-width:340px;overflow:hidden;max-height:80vh;display:flex;flex-direction:column}
+.popup-header{padding:14px 16px;border-bottom:0.5px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.popup-header span{font-size:17px;font-weight:600;color:#1a1a1a}
+.popup-close{background:none;border:none;font-size:24px;color:#999;cursor:pointer;line-height:1;padding:0}
+.popup-list{padding:4px 0;overflow-y:auto}
+.popup-item{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;border-bottom:0.5px solid #f0f0f0}
+.popup-item:last-child{border-bottom:none}
+.popup-item:active{background:#f5f5f5}
+.popup-item .snm{font-size:16px;color:#1a1a1a}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-bar">
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.1</span></span>
+    <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
+  </div>
+  <div class="sub-title">근무 배치 참고용 현황</div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <label>X-MASTER-KEY</label>
+    <input type="password" id="apiKey" placeholder="$2a$10$..." />
+    <label>Bin ID</label>
+    <input type="text" id="binId" placeholder="6a0ad6..." />
+    <div class="sync-bar">
+      <button class="sync-btn" onclick="loadData()"><i class="ti ti-download"></i> 불러오기</button>
+      <button class="sync-btn" onclick="saveData()"><i class="ti ti-upload"></i> 저장하기</button>
+    </div>
+    <div class="sync-msg" id="syncMsg"></div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('table')">표 보기</div>
+    <div class="tab" onclick="switchTab('card')">카드 보기</div>
+  </div>
+
+  <div class="section active" id="sec-table">
+    <div class="matrix-wrap"><table class="matrix" id="matrixTable"></table></div>
+  </div>
+  <div class="section" id="sec-card">
+    <div class="card-grid" id="cardGrid"></div>
+  </div>
+
+  <div class="input-section">
+    <div class="lock-bar">
+      <input type="password" id="pwInput" placeholder="비밀번호 입력" />
+      <button onclick="checkPw()">확인</button>
+    </div>
+    <div class="unlocked" id="unlockedArea">
+      <div class="date-row">
+        <label>날짜</label>
+        <input type="date" id="dateInput" />
+      </div>
+      <div class="cho-grid" id="choGrid"></div>
+      <div class="save-msg" id="saveMsg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup-box">
+    <div class="popup-header">
+      <span id="popupTitle"></span>
+      <button class="popup-close" onclick="closePopup()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="popup-list" id="popupList"></div>
+  </div>
+</div>
+
+<script>
+const CHO=[1,2,3,5,6,7,8,9,10,11];
+const SITES=['성우','대양','제이','씨월드','삼호철판','참치','대불','당직','자동차','지원'];
+const PW='1234';
+const DEFAULT_BIN='6a0ad6bbc0954111d83e321a';
+let data={};
+let currentCho=null;
+
+function today(){return new Date().toISOString().slice(0,10)}
+
+function dayDiff(d){
+  if(!d) return null;
+  const a=new Date(d),b=new Date();
+  a.setHours(0,0,0,0);b.setHours(0,0,0,0);
+  return Math.floor((b-a)/86400000);
+}
+
+function badge(diff){
+  if(diff===null) return '<span class="dn">-</span>';
+  if(diff<=4) return `<span class="dg">D+${diff}</span>`;
+  if(diff<=7) return `<span class="dy">D+${diff}</span>`;
+  return `<span class="dr">D+${diff}</span>`;
+}
+
+function getLast(cho,site){return data[`${cho}_${site}`]||null}
+
+function renderMatrix(){
+  let h='<tr><th>조</th>';
+  SITES.forEach(s=>h+=`<th>${s}</th>`);
+  h+='</tr>';
+  CHO.forEach(c=>{
+    h+=`<tr><td class="rh">${c}조</td>`;
+    SITES.forEach(s=>h+=`<td>${badge(dayDiff(getLast(c,s)))}</td>`);
+    h+='</tr>';
+  });
+  document.getElementById('matrixTable').innerHTML=h;
+}
+
+function renderCards(){
+  let h='';
+  SITES.forEach(s=>{
+    h+=`<div class="site-card"><div class="site-name">${s}</div>`;
+    CHO.forEach(c=>h+=`<div class="card-row"><span>${c}조</span>${badge(dayDiff(getLast(c,s)))}</div>`);
+    h+='</div>';
+  });
+  document.getElementById('cardGrid').innerHTML=h;
+}
+
+function renderChoGrid(){
+  document.getElementById('choGrid').innerHTML=CHO.map(c=>`<button class="cho-btn" onclick="openPopup(${c})">${c}조</button>`).join('');
+}
+
+function renderAll(){renderMatrix();renderCards()}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&t==='table')||(i===1&&t==='card')));
+  document.getElementById('sec-table').classList.toggle('active',t==='table');
+  document.getElementById('sec-card').classList.toggle('active',t==='card');
+}
+
+function checkPw(){
+  if(document.getElementById('pwInput').value===PW){
+    document.getElementById('unlockedArea').classList.add('show');
+    document.getElementById('dateInput').value=today();
+    renderChoGrid();
+  } else alert('비밀번호가 틀렸습니다.');
+}
+
+function openPopup(cho){
+  currentCho=cho;
+  document.getElementById('popupTitle').textContent=`${cho}조 현장 선택`;
+  document.getElementById('popupList').innerHTML=SITES.map(s=>`<div class="popup-item" onclick="selectSite('${s}')"><span class="snm">${s}</span>${badge(dayDiff(getLast(cho,s)))}</div>`).join('');
+  document.getElementById('popupOverlay').classList.add('show');
+}
+
+function closePopup(){
+  document.getElementById('popupOverlay').classList.remove('show');
+  currentCho=null;
+}
+
+function selectSite(site){
+  const date=document.getElementById('dateInput').value;
+  if(!date){alert('날짜를 먼저 선택하세요.');return}
+  data[`${currentCho}_${site}`]=date;
+  closePopup();
+  renderAll();
+  const m=document.getElementById('saveMsg');
+  m.textContent=`✓ ${currentCho}조 → ${site} (${date})`;
+  setTimeout(()=>m.textContent='',3000);
+}
+
+function toggleSettings(){
+  const p=document.getElementById('settingsPanel');
+  p.classList.toggle('show');
+  if(p.classList.contains('show')){
+    document.getElementById('binId').value=localStorage.getItem('bin_id')||DEFAULT_BIN;
+    document.getElementById('apiKey').value=localStorage.getItem('api_key')||'';
+  }
+}
+
+function getConfig(){
+  const key=document.getElementById('apiKey').value.trim()||localStorage.getItem('api_key')||'';
+  const bin=document.getElementById('binId').value.trim()||localStorage.getItem('bin_id')||DEFAULT_BIN;
+  return{key,bin};
+}
+
+function setMsg(m){document.getElementById('syncMsg').textContent=m}
+
+async function loadData(){
+  const{key,bin}=getConfig();
+  if(!key){setMsg('X-MASTER-KEY를 입력하세요.');return}
+  setMsg('불러오는 중...');
+  try{
+    const r=await fetch(`https://api.jsonbin.io/v3/b/${bin}/latest`,{
+      headers:{'X-Master-Key':key}
+    });
+    const j=await r.json();
+    if(j.record){
+      data=j.record;
+      localStorage.setItem('api_key',key);
+      localStorage.setItem('bin_id',bin);
+      renderAll();
+      setMsg('불러오기 완료!');
+    } else setMsg('오류: '+JSON.stringify(j));
+  }catch(e){setMsg('오류: '+e.message)}
+}
+
+async function saveData(){
+  const{key,bin}=getConfig();
+  if(!key){setMsg('X-MASTER-KEY를 입력하세요.');return}
+  setMsg('저장 중...');
+  try{
+    const r=await fetch(`https://api.jsonbin.io/v3/b/${bin}`,{
+      method:'PUT',
+      headers:{'X-Master-Key':key,'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    const j=await r.json();
+    if(j.record){
+      localStorage.setItem('api_key',key);
+      localStorage.setItem('bin_id',bin);
+      setMsg('저장 완료!');
+    } else setMsg('저장 실패: '+JSON.stringify(j));
+  }catch(e){setMsg('오류: '+e.message)}
+}
+
+try{const s=localStorage.getItem('baechi_data');if(s)data=JSON.parse(s)}catch(e){}
+setInterval(()=>{try{localStorage.setItem('baechi_data',JSON.stringify(data))}catch(e){}},5000);
+renderAll();
+</script>
+</body>
+</html>
