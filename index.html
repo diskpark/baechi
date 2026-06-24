@@ -78,7 +78,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.14</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.15</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
@@ -235,8 +235,8 @@ function renderCards(){
       },400);
     },{passive:true});
     card.addEventListener('touchmove',e=>{
-      clearTimeout(longPressTimer);
-      if(!touchClone||!touchDrag) return;
+      if(!touchDrag){ clearTimeout(longPressTimer); return; }
+      if(!touchClone) return;
       const t=e.touches[0];
       const rect=touchClone.getBoundingClientRect();
       touchClone.style.top=(parseFloat(touchClone.style.top)+(t.clientY-rect.top-rect.height/2))+'px';
