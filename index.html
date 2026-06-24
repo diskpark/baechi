@@ -63,21 +63,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .popup-item.bibun-item{background:#fafafa}
 .popup-item .snm{font-size:16px;color:#1a1a1a}
 .popup-item.bibun-item .snm{color:#999}
-.token-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200}
-.token-popup.show{display:flex}
-.token-box{background:#fff;border-radius:16px;width:92%;max-width:340px;padding:20px}
-.token-box h3{font-size:16px;font-weight:600;margin-bottom:6px}
-.token-box p{font-size:12px;color:#888;margin-bottom:14px;line-height:1.5}
-.token-box input{width:100%;font-size:13px;padding:10px 12px;border:0.5px solid #ddd;border-radius:8px;background:#f9f9f9;color:#1a1a1a;margin-bottom:10px}
-.token-box-btns{display:flex;gap:8px}
-.token-box-btns button{flex:1;padding:10px;font-size:14px;border-radius:8px;cursor:pointer;border:0.5px solid #ccc}
-.token-confirm{background:#1a1a1a;color:#fff;border-color:#1a1a1a!important}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.5</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.6</span></span>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
   <div class="sync-msg" id="syncMsg"></div>
@@ -121,26 +112,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="token-popup" id="tokenPopup">
-  <div class="token-box">
-    <h3>처음 설정</h3>
-    <p>관리자 저장 권한을 위해 GitHub Token을 한번만 입력해주세요. 이후엔 자동으로 저장됩니다.</p>
-    <input type="password" id="tokenInput" placeholder="ghp_..." />
-    <div class="token-box-btns">
-      <button onclick="closeTokenPopup()">취소</button>
-      <button class="token-confirm" onclick="confirmToken()">확인</button>
-    </div>
-  </div>
-</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBN3K0UrSHL6rw6i3EZeDXDwcwzvVDThL8",
+  authDomain: "baechi-4535c.firebaseapp.com",
+  databaseURL: "https://baechi-4535c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "baechi-4535c",
+  storageBucket: "baechi-4535c.firebasestorage.app",
+  messagingSenderId: "470541796141",
+  appId: "1:470541796141:web:21fc0cf6fc1f6c21c009a4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 const CHO=[1,2,3,5,6,7,8,9,10,11];
 const SITES=['성우','대양','제이','씨월드','삼호철판','참치','대불','당직','자동차','지원','쌀','비번'];
 const PW='1234';
-const GIST_ID='5e803b05976f2889e17694d10af0f29b';
 let data={};
 let currentCho=null;
-let pendingSave=false;
 
 function today(){return new Date().toISOString().slice(0,10)}
 
@@ -196,7 +189,7 @@ function switchTab(t){
   document.getElementById('sec-card').classList.toggle('active',t==='card');
 }
 
-function checkPw(){
+window.checkPw=function(){
   if(document.getElementById('pwInput').value===PW){
     document.getElementById('unlockedArea').classList.add('show');
     document.getElementById('dateInput').value=today();
@@ -204,7 +197,7 @@ function checkPw(){
   } else alert('비밀번호가 틀렸습니다.');
 }
 
-function openPopup(cho){
+window.openPopup=function(cho){
   currentCho=cho;
   document.getElementById('popupTitle').textContent=`${cho}조 현장 선택`;
   document.getElementById('popupList').innerHTML=SITES.map(s=>{
@@ -216,12 +209,12 @@ function openPopup(cho){
   document.getElementById('popupOverlay').classList.add('show');
 }
 
-function closePopup(){
+window.closePopup=function(){
   document.getElementById('popupOverlay').classList.remove('show');
   currentCho=null;
 }
 
-function selectSite(site){
+window.selectSite=function(site){
   const date=document.getElementById('dateInput').value;
   if(!date){alert('날짜를 먼저 선택하세요.');return}
   data[`${currentCho}_${site}`]=date;
@@ -232,59 +225,26 @@ function selectSite(site){
   setTimeout(()=>m.textContent='',3000);
 }
 
-function setMsg(m){document.getElementById('syncMsg').textContent=m}
-
-async function loadData(){
-  setMsg('데이터 불러오는 중...');
-  try{
-    const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-      headers:{'Accept':'application/vnd.github.v3+json'}
-    });
-    const j=await r.json();
-    const content=j.files&&j.files['data.json']&&j.files['data.json'].content;
-    if(content){data=JSON.parse(content);renderAll();setMsg('');}
-    else setMsg('데이터 없음');
-  }catch(e){setMsg('불러오기 실패')}
-}
-
-async function saveData(){
-  const token=localStorage.getItem('gh_token')||'';
-  if(!token){pendingSave=true;document.getElementById('tokenPopup').classList.add('show');return}
-  doSave(token);
-}
-
-async function doSave(token){
+window.saveData=async function(){
   const m=document.getElementById('saveMsg');
   m.textContent='저장 중...';
   try{
-    const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-      method:'PATCH',
-      headers:{'Authorization':`token ${token}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:JSON.stringify({files:{'data.json':{content:JSON.stringify(data,null,2)}}})
-    });
-    const j=await r.json();
-    if(j.id){
-      localStorage.setItem('gh_token',token);
-      m.textContent='저장 완료!';
-      setTimeout(()=>m.textContent='',3000);
-    } else {
-      localStorage.removeItem('gh_token');
-      m.textContent='저장 실패 - 토큰 확인 필요';
+    await set(ref(db,'baechi'),data);
+    m.textContent='저장 완료!';
+    setTimeout(()=>m.textContent='',3000);
+  }catch(e){m.textContent='저장 실패: '+e.message}
+}
+
+async function loadData(){
+  document.getElementById('syncMsg').textContent='데이터 불러오는 중...';
+  try{
+    const snapshot=await get(ref(db,'baechi'));
+    if(snapshot.exists()){
+      data=snapshot.val();
+      renderAll();
     }
-  }catch(e){m.textContent='오류: '+e.message}
-}
-
-function closeTokenPopup(){
-  document.getElementById('tokenPopup').classList.remove('show');
-  pendingSave=false;
-}
-
-function confirmToken(){
-  const token=document.getElementById('tokenInput').value.trim();
-  if(!token){alert('토큰을 입력하세요.');return}
-  document.getElementById('tokenPopup').classList.remove('show');
-  document.getElementById('tokenInput').value='';
-  if(pendingSave){pendingSave=false;doSave(token);}
+    document.getElementById('syncMsg').textContent='';
+  }catch(e){document.getElementById('syncMsg').textContent='불러오기 실패: '+e.message}
 }
 
 loadData();
