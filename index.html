@@ -13,16 +13,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .app-title{font-size:20px;font-weight:600;color:#1a1a1a}
 .version-badge{display:inline-block;background:#e8f0fe;color:#1a73e8;font-size:11px;padding:2px 8px;border-radius:6px;margin-left:6px;vertical-align:middle}
 .sub-title{font-size:12px;color:#888;text-align:center;padding:2px 0 10px}
-.settings-btn{position:absolute;right:0;top:10px;background:none;border:none;cursor:pointer;color:#888;font-size:22px;line-height:1}
-.settings-panel{display:none;background:#f0f0f0;border-radius:12px;padding:14px;margin-bottom:12px;border:0.5px solid #ddd}
-.settings-panel.show{display:block}
-.settings-panel label{font-size:12px;color:#666;display:block;margin-bottom:4px;margin-top:10px}
-.settings-panel label:first-child{margin-top:0}
-.settings-panel input{width:100%;font-size:13px;padding:8px 12px;border:0.5px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a}
-.sync-bar{display:flex;gap:8px;margin-top:12px}
-.sync-btn{flex:1;padding:9px;font-size:13px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer}
-.sync-btn:active{background:#f0f0f0}
-.sync-msg{font-size:12px;color:#888;text-align:center;margin-top:6px;min-height:16px}
+.sync-msg{font-size:12px;color:#888;text-align:center;margin-bottom:8px;min-height:16px}
 .tab-bar{display:flex;border-bottom:0.5px solid #ddd;margin-bottom:12px}
 .tab{flex:1;text-align:center;padding:10px 4px;font-size:14px;cursor:pointer;color:#888;border-bottom:2px solid transparent}
 .tab.active{color:#1a1a1a;border-bottom:2px solid #1a1a1a;font-weight:500}
@@ -56,6 +47,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cho-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .cho-btn{padding:14px 8px;font-size:17px;font-weight:600;border:0.5px solid #ccc;border-radius:12px;background:#fff;color:#1a1a1a;cursor:pointer;text-align:center}
 .cho-btn:active{background:#f0f0f0}
+.save-btn{width:100%;padding:12px;font-size:15px;font-weight:600;border:none;border-radius:12px;background:#1a1a1a;color:#fff;cursor:pointer;margin-top:12px}
+.save-btn:active{background:#333}
 .save-msg{font-size:12px;color:#888;text-align:center;margin-top:8px;min-height:16px}
 .popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:flex-start;justify-content:center;padding-top:80px;z-index:100}
 .popup-overlay.show{display:flex}
@@ -70,27 +63,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .popup-item.bibun-item{background:#fafafa}
 .popup-item .snm{font-size:16px;color:#1a1a1a}
 .popup-item.bibun-item .snm{color:#999}
+.token-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200}
+.token-popup.show{display:flex}
+.token-box{background:#fff;border-radius:16px;width:92%;max-width:340px;padding:20px}
+.token-box h3{font-size:16px;font-weight:600;margin-bottom:6px}
+.token-box p{font-size:12px;color:#888;margin-bottom:14px;line-height:1.5}
+.token-box input{width:100%;font-size:13px;padding:10px 12px;border:0.5px solid #ddd;border-radius:8px;background:#f9f9f9;color:#1a1a1a;margin-bottom:10px}
+.token-box-btns{display:flex;gap:8px}
+.token-box-btns button{flex:1;padding:10px;font-size:14px;border-radius:8px;cursor:pointer;border:0.5px solid #ccc}
+.token-confirm{background:#1a1a1a;color:#fff;border-color:#1a1a1a!important}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.4</span></span>
-    <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.5</span></span>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
-
-  <div class="settings-panel" id="settingsPanel">
-    <label>GitHub Token</label>
-    <input type="password" id="ghToken" placeholder="ghp_..." />
-    <label>Gist ID</label>
-    <input type="text" id="ghGist" placeholder="5e803b..." />
-    <div class="sync-bar">
-      <button class="sync-btn" onclick="loadData()"><i class="ti ti-download"></i> 불러오기</button>
-      <button class="sync-btn" onclick="saveData()"><i class="ti ti-upload"></i> 저장하기</button>
-    </div>
-    <div class="sync-msg" id="syncMsg"></div>
-  </div>
+  <div class="sync-msg" id="syncMsg"></div>
 
   <div class="tab-bar">
     <div class="tab active" onclick="switchTab('table')">표 보기</div>
@@ -106,7 +96,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   <div class="input-section">
     <div class="lock-bar">
-      <input type="password" id="pwInput" placeholder="비밀번호 입력" />
+      <input type="password" id="pwInput" placeholder="관리자 비밀번호" />
       <button onclick="checkPw()">확인</button>
     </div>
     <div class="unlocked" id="unlockedArea">
@@ -115,6 +105,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <input type="date" id="dateInput" />
       </div>
       <div class="cho-grid" id="choGrid"></div>
+      <button class="save-btn" onclick="saveData()">저장하기</button>
       <div class="save-msg" id="saveMsg"></div>
     </div>
   </div>
@@ -130,13 +121,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<div class="token-popup" id="tokenPopup">
+  <div class="token-box">
+    <h3>처음 설정</h3>
+    <p>관리자 저장 권한을 위해 GitHub Token을 한번만 입력해주세요. 이후엔 자동으로 저장됩니다.</p>
+    <input type="password" id="tokenInput" placeholder="ghp_..." />
+    <div class="token-box-btns">
+      <button onclick="closeTokenPopup()">취소</button>
+      <button class="token-confirm" onclick="confirmToken()">확인</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const CHO=[1,2,3,5,6,7,8,9,10,11];
 const SITES=['성우','대양','제이','씨월드','삼호철판','참치','대불','당직','자동차','지원','쌀','비번'];
 const PW='1234';
-const DEFAULT_GIST='5e803b05976f2889e17694d10af0f29b';
+const GIST_ID='5e803b05976f2889e17694d10af0f29b';
 let data={};
 let currentCho=null;
+let pendingSave=false;
 
 function today(){return new Date().toISOString().slice(0,10)}
 
@@ -163,10 +167,7 @@ function renderMatrix(){
   h+='</tr>';
   CHO.forEach(c=>{
     h+=`<tr><td class="rh">${c}조</td>`;
-    SITES.forEach(s=>{
-      const d=dayDiff(getLast(c,s));
-      h+=`<td>${badge(d,s)}</td>`;
-    });
+    SITES.forEach(s=>h+=`<td>${badge(dayDiff(getLast(c,s)),s)}</td>`);
     h+='</tr>';
   });
   document.getElementById('matrixTable').innerHTML=h;
@@ -177,10 +178,7 @@ function renderCards(){
   SITES.forEach(s=>{
     const isBibun=s==='비번';
     h+=`<div class="site-card${isBibun?' bibun':''}"><div class="site-name${isBibun?' bibun':''}">${s}</div>`;
-    CHO.forEach(c=>{
-      const d=dayDiff(getLast(c,s));
-      h+=`<div class="card-row"><span>${c}조</span>${badge(d,s)}</div>`;
-    });
+    CHO.forEach(c=>h+=`<div class="card-row"><span>${c}조</span>${badge(dayDiff(getLast(c,s)),s)}</div>`);
     h+='</div>';
   });
   document.getElementById('cardGrid').innerHTML=h;
@@ -211,9 +209,8 @@ function openPopup(cho){
   document.getElementById('popupTitle').textContent=`${cho}조 현장 선택`;
   document.getElementById('popupList').innerHTML=SITES.map(s=>{
     const isBibun=s==='비번';
-    const d=dayDiff(getLast(cho,s));
     return `<div class="popup-item${isBibun?' bibun-item':''}" onclick="selectSite('${s}')">
-      <span class="snm">${s}</span>${badge(d,s)}
+      <span class="snm">${s}</span>${badge(dayDiff(getLast(cho,s)),s)}
     </div>`;
   }).join('');
   document.getElementById('popupOverlay').classList.add('show');
@@ -235,48 +232,32 @@ function selectSite(site){
   setTimeout(()=>m.textContent='',3000);
 }
 
-function toggleSettings(){
-  const p=document.getElementById('settingsPanel');
-  p.classList.toggle('show');
-  if(p.classList.contains('show')){
-    document.getElementById('ghGist').value=localStorage.getItem('gist_id')||DEFAULT_GIST;
-    document.getElementById('ghToken').value=localStorage.getItem('gh_token')||'';
-  }
-}
-
-function getConfig(){
-  const token=document.getElementById('ghToken').value.trim()||localStorage.getItem('gh_token')||'';
-  const gist=document.getElementById('ghGist').value.trim()||localStorage.getItem('gist_id')||DEFAULT_GIST;
-  return{token,gist};
-}
-
 function setMsg(m){document.getElementById('syncMsg').textContent=m}
 
 async function loadData(){
-  const{token,gist}=getConfig();
-  setMsg('불러오는 중...');
+  setMsg('데이터 불러오는 중...');
   try{
-    const headers={'Accept':'application/vnd.github.v3+json'};
-    if(token) headers['Authorization']=`token ${token}`;
-    const r=await fetch(`https://api.github.com/gists/${gist}`,{headers});
+    const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
+      headers:{'Accept':'application/vnd.github.v3+json'}
+    });
     const j=await r.json();
     const content=j.files&&j.files['data.json']&&j.files['data.json'].content;
-    if(content){
-      data=JSON.parse(content);
-      if(token) localStorage.setItem('gh_token',token);
-      localStorage.setItem('gist_id',gist);
-      renderAll();
-      setMsg('불러오기 완료!');
-    } else setMsg('data.json 파일 없음');
-  }catch(e){setMsg('오류: '+e.message)}
+    if(content){data=JSON.parse(content);renderAll();setMsg('');}
+    else setMsg('데이터 없음');
+  }catch(e){setMsg('불러오기 실패')}
 }
 
 async function saveData(){
-  const{token,gist}=getConfig();
-  if(!token){setMsg('GitHub Token을 입력하세요.');return}
-  setMsg('저장 중...');
+  const token=localStorage.getItem('gh_token')||'';
+  if(!token){pendingSave=true;document.getElementById('tokenPopup').classList.add('show');return}
+  doSave(token);
+}
+
+async function doSave(token){
+  const m=document.getElementById('saveMsg');
+  m.textContent='저장 중...';
   try{
-    const r=await fetch(`https://api.github.com/gists/${gist}`,{
+    const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
       method:'PATCH',
       headers:{'Authorization':`token ${token}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
       body:JSON.stringify({files:{'data.json':{content:JSON.stringify(data,null,2)}}})
@@ -284,15 +265,29 @@ async function saveData(){
     const j=await r.json();
     if(j.id){
       localStorage.setItem('gh_token',token);
-      localStorage.setItem('gist_id',gist);
-      setMsg('저장 완료!');
-    } else setMsg('저장 실패: '+JSON.stringify(j));
-  }catch(e){setMsg('오류: '+e.message)}
+      m.textContent='저장 완료!';
+      setTimeout(()=>m.textContent='',3000);
+    } else {
+      localStorage.removeItem('gh_token');
+      m.textContent='저장 실패 - 토큰 확인 필요';
+    }
+  }catch(e){m.textContent='오류: '+e.message}
 }
 
-try{const s=localStorage.getItem('baechi_data');if(s)data=JSON.parse(s)}catch(e){}
-setInterval(()=>{try{localStorage.setItem('baechi_data',JSON.stringify(data))}catch(e){}},5000);
-renderAll();
+function closeTokenPopup(){
+  document.getElementById('tokenPopup').classList.remove('show');
+  pendingSave=false;
+}
+
+function confirmToken(){
+  const token=document.getElementById('tokenInput').value.trim();
+  if(!token){alert('토큰을 입력하세요.');return}
+  document.getElementById('tokenPopup').classList.remove('show');
+  document.getElementById('tokenInput').value='';
+  if(pendingSave){pendingSave=false;doSave(token);}
+}
+
+loadData();
 </script>
 </body>
 </html>
