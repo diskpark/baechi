@@ -68,7 +68,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.6</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.7</span></span>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
   <div class="sync-msg" id="syncMsg"></div>
@@ -229,7 +229,7 @@ window.saveData=async function(){
   const m=document.getElementById('saveMsg');
   m.textContent='저장 중...';
   try{
-    await set(ref(db,'baechi'),data);
+    await set(ref(db,'/'),data);
     m.textContent='저장 완료!';
     setTimeout(()=>m.textContent='',3000);
   }catch(e){m.textContent='저장 실패: '+e.message}
@@ -238,7 +238,7 @@ window.saveData=async function(){
 async function loadData(){
   document.getElementById('syncMsg').textContent='데이터 불러오는 중...';
   try{
-    const snapshot=await get(ref(db,'baechi'));
+    const snapshot=await get(ref(db,'/'));
     if(snapshot.exists()){
       data=snapshot.val();
       renderAll();
