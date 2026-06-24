@@ -31,10 +31,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .matrix td{padding:5px 2px;text-align:center;border:0.5px solid #ddd;font-size:10px;white-space:nowrap;background:#fff}
 .matrix td.rh{background:#f0f0f0;font-weight:500;font-size:11px;color:#1a1a1a;padding:5px 6px}
 .card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.site-card{touch-action:none;cursor:grab}
-.site-card.dragging{opacity:0.4;border:2px dashed #aaa}
-.site-card.drag-over{border:2px solid #1a73e8}
-.drag-hint{font-size:11px;color:#bbb;text-align:center;padding:6px 0 2px}
 .site-card{background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:8px}
 .site-card.bibun{background:#fafafa}
 .site-name{font-size:12px;font-weight:600;color:#1a1a1a;margin-bottom:5px;border-bottom:0.5px solid #eee;padding-bottom:4px}
@@ -78,7 +74,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.16</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.17</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
@@ -86,10 +82,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <label>관리자 비밀번호</label>
     <input type="password" id="pwInput" placeholder="비밀번호 입력" />
     <button onclick="checkPw()">확인</button>
-    <div style="margin-top:14px;border-top:0.5px solid #ddd;padding-top:12px">
-      <div style="font-size:12px;color:#666;margin-bottom:8px">카드 순서 변경 (드래그)</div>
-      <div id="sortGrid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"></div>
-    </div>
+
   </div>
   <div class="sync-msg" id="syncMsg"></div>
 
@@ -203,77 +196,6 @@ function renderCards(){
   });
 }
 
-function renderSortGrid(){
-  const grid=document.getElementById('sortGrid');
-  if(!grid) return;
-  grid.innerHTML='';
-  cardOrder.forEach(s=>{
-    const item=document.createElement('div');
-    item.dataset.site=s;
-    item.draggable=true;
-    item.style.cssText='background:#fff;border:0.5px solid #ddd;border-radius:8px;padding:8px;text-align:center;font-size:13px;font-weight:500;cursor:grab;touch-action:none;';
-    item.textContent=s;
-
-    // PC 드래그
-    item.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',s);item.style.opacity='0.4';});
-    item.addEventListener('dragend',()=>item.style.opacity='');
-    item.addEventListener('dragover',e=>{e.preventDefault();item.style.border='2px solid #1a73e8';});
-    item.addEventListener('dragleave',()=>item.style.border='0.5px solid #ddd');
-    item.addEventListener('drop',e=>{
-      e.preventDefault();
-      item.style.border='0.5px solid #ddd';
-      const from=e.dataTransfer.getData('text/plain'),to=s;
-      if(from===to) return;
-      const fi=cardOrder.indexOf(from),ti=cardOrder.indexOf(to);
-      cardOrder.splice(fi,1);cardOrder.splice(ti,0,from);
-      saveCardOrder();renderCards();renderSortGrid();
-    });
-
-    // 모바일 터치
-    let clone=null,startSite=null;
-    item.addEventListener('touchstart',e=>{
-      startSite=s;
-      const t=e.touches[0];
-      const rect=item.getBoundingClientRect();
-      clone=item.cloneNode(true);
-      clone.style.cssText=`position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;opacity:0.85;z-index:9999;pointer-events:none;background:#fff;border:2px solid #1a73e8;border-radius:8px;padding:8px;text-align:center;font-size:13px;font-weight:500;`;
-      document.body.appendChild(clone);
-      item.style.opacity='0.3';
-    },{passive:true});
-    item.addEventListener('touchmove',e=>{
-      if(!clone) return;
-      const t=e.touches[0];
-      clone.style.top=(t.clientY-20)+'px';
-      clone.style.left=(t.clientX-item.offsetWidth/2)+'px';
-      document.querySelectorAll('#sortGrid > div').forEach(c=>c.style.border='0.5px solid #ddd');
-      clone.style.display='none';
-      const el=document.elementFromPoint(t.clientX,t.clientY);
-      clone.style.display='';
-      const target=el&&el.closest('#sortGrid > div');
-      if(target&&target.dataset.site!==startSite) target.style.border='2px solid #1a73e8';
-    },{passive:true});
-    const endT=e=>{
-      if(!clone){item.style.opacity='';return;}
-      const t=e.changedTouches[0];
-      clone.style.display='none';
-      const el=document.elementFromPoint(t.clientX,t.clientY);
-      clone.style.display='';
-      const target=el&&el.closest('#sortGrid > div');
-      if(target&&target.dataset.site&&target.dataset.site!==startSite){
-        const from=startSite,to=target.dataset.site;
-        const fi=cardOrder.indexOf(from),ti=cardOrder.indexOf(to);
-        cardOrder.splice(fi,1);cardOrder.splice(ti,0,from);
-        saveCardOrder();renderCards();
-      }
-      clone.remove();clone=null;
-      document.querySelectorAll('#sortGrid > div').forEach(c=>{c.style.border='0.5px solid #ddd';c.style.opacity='';});
-      renderSortGrid();
-    };
-    item.addEventListener('touchend',endT,{passive:true});
-    item.addEventListener('touchcancel',endT,{passive:true});
-    grid.appendChild(item);
-  });
-}
 
 function renderChoGrid(){
   document.getElementById('choGrid').innerHTML=CHO.map(c=>`<button class="cho-btn" onclick="openPopup(${c})">${c}조</button>`).join('');
@@ -288,9 +210,7 @@ window.switchTab=function(t){
 }
 
 window.toggleSettings=function(){
-  const p=document.getElementById('settingsPanel');
-  p.classList.toggle('show');
-  if(p.classList.contains('show')) renderSortGrid();
+  document.getElementById('settingsPanel').classList.toggle('show');
 }
 
 window.checkPw=function(){
