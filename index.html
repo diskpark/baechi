@@ -254,17 +254,16 @@ function setMsg(m){document.getElementById('syncMsg').textContent=m}
 
 async function loadData(){
   const{token,gist}=getConfig();
-  if(!token){setMsg('GitHub Token을 입력하세요.');return}
   setMsg('불러오는 중...');
   try{
-    const r=await fetch(`https://api.github.com/gists/${gist}`,{
-      headers:{'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json'}
-    });
+    const headers={'Accept':'application/vnd.github.v3+json'};
+    if(token) headers['Authorization']=`token ${token}`;
+    const r=await fetch(`https://api.github.com/gists/${gist}`,{headers});
     const j=await r.json();
     const content=j.files&&j.files['data.json']&&j.files['data.json'].content;
     if(content){
       data=JSON.parse(content);
-      localStorage.setItem('gh_token',token);
+      if(token) localStorage.setItem('gh_token',token);
       localStorage.setItem('gist_id',gist);
       renderAll();
       setMsg('불러오기 완료!');
