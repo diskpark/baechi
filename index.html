@@ -35,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .matrix td.rh{background:#f0f0f0;font-weight:500;font-size:11px;color:#1a1a1a;padding:5px 6px}
 .card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .site-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:10px 12px}
-.site-card.bibun{border-color:#ccc;background:#fafafa}
+.site-card.bibun{background:#fafafa}
 .site-name{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px;border-bottom:0.5px solid #eee;padding-bottom:5px}
 .site-name.bibun{color:#999}
 .card-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;color:#666}
@@ -75,16 +75,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.2</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.3</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
 
   <div class="settings-panel" id="settingsPanel">
-    <label>X-MASTER-KEY</label>
-    <input type="password" id="apiKey" placeholder="$2a$10$..." />
-    <label>Bin ID</label>
-    <input type="text" id="binId" placeholder="6a0ad6..." />
+    <label>GitHub Token</label>
+    <input type="password" id="ghToken" placeholder="ghp_..." />
+    <label>Gist ID</label>
+    <input type="text" id="ghGist" placeholder="5e803b..." />
     <div class="sync-bar">
       <button class="sync-btn" onclick="loadData()"><i class="ti ti-download"></i> 불러오기</button>
       <button class="sync-btn" onclick="saveData()"><i class="ti ti-upload"></i> 저장하기</button>
@@ -134,7 +134,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 const CHO=[1,2,3,5,6,7,8,9,10,11];
 const SITES=['성우','대양','제이','씨월드','삼호철판','참치','대불','당직','자동차','지원','비번'];
 const PW='1234';
-const DEFAULT_BIN='6a0ad6bbc0954111d83e321a';
+const DEFAULT_GIST='5e803b05976f2889e17694d10af0f29b';
 let data={};
 let currentCho=null;
 
@@ -147,7 +147,7 @@ function dayDiff(d){
   return Math.floor((b-a)/86400000);
 }
 
-function badge(diff, site){
+function badge(diff,site){
   if(site==='비번') return '<span class="db">비번</span>';
   if(diff===null) return '<span class="dn">-</span>';
   if(diff<=4) return `<span class="dg">D+${diff}</span>`;
@@ -156,15 +156,6 @@ function badge(diff, site){
 }
 
 function getLast(cho,site){return data[`${cho}_${site}`]||null}
-
-function getLastSite(cho){
-  let latest=null, latestDate=null;
-  SITES.forEach(s=>{
-    const d=data[`${cho}_${s}`];
-    if(d && (!latestDate || d>latestDate)){latestDate=d;latest=s;}
-  });
-  return {site:latest,date:latestDate};
-}
 
 function renderMatrix(){
   let h='<tr><th>조</th>';
@@ -248,52 +239,53 @@ function toggleSettings(){
   const p=document.getElementById('settingsPanel');
   p.classList.toggle('show');
   if(p.classList.contains('show')){
-    document.getElementById('binId').value=localStorage.getItem('bin_id')||DEFAULT_BIN;
-    document.getElementById('apiKey').value=localStorage.getItem('api_key')||'';
+    document.getElementById('ghGist').value=localStorage.getItem('gist_id')||DEFAULT_GIST;
+    document.getElementById('ghToken').value=localStorage.getItem('gh_token')||'';
   }
 }
 
 function getConfig(){
-  const key=document.getElementById('apiKey').value.trim()||localStorage.getItem('api_key')||'';
-  const bin=document.getElementById('binId').value.trim()||localStorage.getItem('bin_id')||DEFAULT_BIN;
-  return{key,bin};
+  const token=document.getElementById('ghToken').value.trim()||localStorage.getItem('gh_token')||'';
+  const gist=document.getElementById('ghGist').value.trim()||localStorage.getItem('gist_id')||DEFAULT_GIST;
+  return{token,gist};
 }
 
 function setMsg(m){document.getElementById('syncMsg').textContent=m}
 
 async function loadData(){
-  const{key,bin}=getConfig();
-  if(!key){setMsg('X-MASTER-KEY를 입력하세요.');return}
+  const{token,gist}=getConfig();
+  if(!token){setMsg('GitHub Token을 입력하세요.');return}
   setMsg('불러오는 중...');
   try{
-    const r=await fetch(`https://api.jsonbin.io/v3/b/${bin}/latest`,{
-      headers:{'X-Master-Key':key}
+    const r=await fetch(`https://api.github.com/gists/${gist}`,{
+      headers:{'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json'}
     });
     const j=await r.json();
-    if(j.record){
-      data=j.record;
-      localStorage.setItem('api_key',key);
-      localStorage.setItem('bin_id',bin);
+    const content=j.files&&j.files['data.json']&&j.files['data.json'].content;
+    if(content){
+      data=JSON.parse(content);
+      localStorage.setItem('gh_token',token);
+      localStorage.setItem('gist_id',gist);
       renderAll();
       setMsg('불러오기 완료!');
-    } else setMsg('오류: '+JSON.stringify(j));
+    } else setMsg('data.json 파일 없음');
   }catch(e){setMsg('오류: '+e.message)}
 }
 
 async function saveData(){
-  const{key,bin}=getConfig();
-  if(!key){setMsg('X-MASTER-KEY를 입력하세요.');return}
+  const{token,gist}=getConfig();
+  if(!token){setMsg('GitHub Token을 입력하세요.');return}
   setMsg('저장 중...');
   try{
-    const r=await fetch(`https://api.jsonbin.io/v3/b/${bin}`,{
-      method:'PUT',
-      headers:{'X-Master-Key':key,'Content-Type':'application/json'},
-      body:JSON.stringify(data)
+    const r=await fetch(`https://api.github.com/gists/${gist}`,{
+      method:'PATCH',
+      headers:{'Authorization':`token ${token}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify({files:{'data.json':{content:JSON.stringify(data,null,2)}}})
     });
     const j=await r.json();
-    if(j.record){
-      localStorage.setItem('api_key',key);
-      localStorage.setItem('bin_id',bin);
+    if(j.id){
+      localStorage.setItem('gh_token',token);
+      localStorage.setItem('gist_id',gist);
       setMsg('저장 완료!');
     } else setMsg('저장 실패: '+JSON.stringify(j));
   }catch(e){setMsg('오류: '+e.message)}
