@@ -35,12 +35,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .matrix td.rh{background:#f0f0f0;font-weight:500;font-size:11px;color:#1a1a1a;padding:5px 6px}
 .card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .site-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:10px 12px}
+.site-card.bibun{border-color:#ccc;background:#fafafa}
 .site-name{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px;border-bottom:0.5px solid #eee;padding-bottom:5px}
+.site-name.bibun{color:#999}
 .card-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;color:#666}
 .dg{background:#EAF3DE;color:#3B6D11;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
 .dy{background:#FAEEDA;color:#854F0B;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
 .dr{background:#FCEBEB;color:#A32D2D;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
 .dn{background:#f0f0f0;color:#999;padding:2px 6px;border-radius:6px;font-size:10px}
+.db{background:#f0f0f0;color:#aaa;padding:2px 6px;border-radius:6px;font-size:10px}
 .input-section{margin-top:16px;border-top:0.5px solid #ddd;padding-top:14px}
 .lock-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .lock-bar input{flex:1;font-size:14px;padding:9px 12px;border:0.5px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a}
@@ -64,13 +67,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .popup-item{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;border-bottom:0.5px solid #f0f0f0}
 .popup-item:last-child{border-bottom:none}
 .popup-item:active{background:#f5f5f5}
+.popup-item.bibun-item{background:#fafafa}
 .popup-item .snm{font-size:16px;color:#1a1a1a}
+.popup-item.bibun-item .snm{color:#999}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.1</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.2</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
@@ -127,7 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script>
 const CHO=[1,2,3,5,6,7,8,9,10,11];
-const SITES=['성우','대양','제이','씨월드','삼호철판','참치','대불','당직','자동차','지원'];
+const SITES=['성우','대양','제이','씨월드','삼호철판','참치','대불','당직','자동차','지원','비번'];
 const PW='1234';
 const DEFAULT_BIN='6a0ad6bbc0954111d83e321a';
 let data={};
@@ -142,7 +147,8 @@ function dayDiff(d){
   return Math.floor((b-a)/86400000);
 }
 
-function badge(diff){
+function badge(diff, site){
+  if(site==='비번') return '<span class="db">비번</span>';
   if(diff===null) return '<span class="dn">-</span>';
   if(diff<=4) return `<span class="dg">D+${diff}</span>`;
   if(diff<=7) return `<span class="dy">D+${diff}</span>`;
@@ -151,13 +157,25 @@ function badge(diff){
 
 function getLast(cho,site){return data[`${cho}_${site}`]||null}
 
+function getLastSite(cho){
+  let latest=null, latestDate=null;
+  SITES.forEach(s=>{
+    const d=data[`${cho}_${s}`];
+    if(d && (!latestDate || d>latestDate)){latestDate=d;latest=s;}
+  });
+  return {site:latest,date:latestDate};
+}
+
 function renderMatrix(){
   let h='<tr><th>조</th>';
   SITES.forEach(s=>h+=`<th>${s}</th>`);
   h+='</tr>';
   CHO.forEach(c=>{
     h+=`<tr><td class="rh">${c}조</td>`;
-    SITES.forEach(s=>h+=`<td>${badge(dayDiff(getLast(c,s)))}</td>`);
+    SITES.forEach(s=>{
+      const d=dayDiff(getLast(c,s));
+      h+=`<td>${badge(d,s)}</td>`;
+    });
     h+='</tr>';
   });
   document.getElementById('matrixTable').innerHTML=h;
@@ -166,8 +184,12 @@ function renderMatrix(){
 function renderCards(){
   let h='';
   SITES.forEach(s=>{
-    h+=`<div class="site-card"><div class="site-name">${s}</div>`;
-    CHO.forEach(c=>h+=`<div class="card-row"><span>${c}조</span>${badge(dayDiff(getLast(c,s)))}</div>`);
+    const isBibun=s==='비번';
+    h+=`<div class="site-card${isBibun?' bibun':''}"><div class="site-name${isBibun?' bibun':''}">${s}</div>`;
+    CHO.forEach(c=>{
+      const d=dayDiff(getLast(c,s));
+      h+=`<div class="card-row"><span>${c}조</span>${badge(d,s)}</div>`;
+    });
     h+='</div>';
   });
   document.getElementById('cardGrid').innerHTML=h;
@@ -196,7 +218,13 @@ function checkPw(){
 function openPopup(cho){
   currentCho=cho;
   document.getElementById('popupTitle').textContent=`${cho}조 현장 선택`;
-  document.getElementById('popupList').innerHTML=SITES.map(s=>`<div class="popup-item" onclick="selectSite('${s}')"><span class="snm">${s}</span>${badge(dayDiff(getLast(cho,s)))}</div>`).join('');
+  document.getElementById('popupList').innerHTML=SITES.map(s=>{
+    const isBibun=s==='비번';
+    const d=dayDiff(getLast(cho,s));
+    return `<div class="popup-item${isBibun?' bibun-item':''}" onclick="selectSite('${s}')">
+      <span class="snm">${s}</span>${badge(d,s)}
+    </div>`;
+  }).join('');
   document.getElementById('popupOverlay').classList.add('show');
 }
 
