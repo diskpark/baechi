@@ -104,7 +104,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.18</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.19</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
@@ -112,7 +112,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="settings-panel" id="settingsPanel">
     <label>관리자 비밀번호</label>
     <input type="password" id="pwInput" placeholder="비밀번호 입력" />
-    <button onclick="checkPw()">확인</button>
+    <button onclick="checkPw()" style="margin-bottom:12px">확인</button>
+    <label style="margin-top:4px">Claude API Key (사진 자동분석용)</label>
+    <input type="password" id="claudeKeyInput" placeholder="sk-ant-api03-..." style="margin-bottom:0" />
+    <button onclick="saveClaudeKey()" style="margin-top:8px;background:#1a73e8">API Key 저장</button>
   </div>
   <div class="sync-msg" id="syncMsg"></div>
 
@@ -155,7 +158,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <input type="date" id="dateInput" />
       </div>
       <div class="cho-grid" id="choGrid"></div>
-      <button class="save-btn" onclick="saveData()">저장하기</button>
+      <div style="margin-bottom:12px">
+  <div style="font-size:12px;color:#666;margin-bottom:8px">📸 근무표 사진으로 자동 입력</div>
+  <label style="display:block;width:100%;padding:12px;font-size:14px;font-weight:500;border:1.5px dashed #ccc;border-radius:12px;background:#fafafa;color:#666;cursor:pointer;text-align:center">
+    사진 업로드
+    <input type="file" accept="image/*" id="photoInput" style="display:none" onchange="analyzePhoto(this)" />
+  </label>
+  <div id="analyzeMsg" style="font-size:12px;color:#888;text-align:center;margin-top:6px;min-height:16px"></div>
+  <div id="analyzeResult" style="margin-top:8px;display:none">
+    <div style="font-size:12px;color:#666;margin-bottom:6px">분석 결과 확인 후 적용하세요:</div>
+    <div id="resultList" style="background:#f9f9f9;border-radius:8px;padding:8px;font-size:12px;max-height:200px;overflow-y:auto"></div>
+    <button onclick="applyResult()" style="width:100%;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:10px;background:#1a73e8;color:#fff;cursor:pointer;margin-top:8px">적용하기</button>
+  </div>
+</div>
+<button class="save-btn" onclick="saveData()">저장하기</button>
       <div class="save-msg" id="saveMsg"></div>
     </div>
   </div>
@@ -326,8 +342,21 @@ window.switchTab=function(t){
   document.getElementById('sec-cho').classList.toggle('active',t==='cho');
 }
 
+window.saveClaudeKey=function(){
+  const key=document.getElementById('claudeKeyInput').value.trim();
+  if(!key){alert('API Key를 입력하세요.');return}
+  localStorage.setItem('claude_api_key',key);
+  document.getElementById('claudeKeyInput').value='';
+  alert('API Key 저장 완료!');
+}
+
 window.toggleSettings=function(){
-  document.getElementById('settingsPanel').classList.toggle('show');
+  const p=document.getElementById('settingsPanel');
+  p.classList.toggle('show');
+  if(p.classList.contains('show')){
+    const k=localStorage.getItem('claude_api_key')||'';
+    if(k) document.getElementById('claudeKeyInput').placeholder='저장됨 (변경시 입력)';
+  }
 }
 
 window.checkPw=function(){
@@ -388,6 +417,97 @@ async function loadData(){
     document.getElementById('syncMsg').textContent='';
   }catch(e){document.getElementById('syncMsg').textContent='불러오기 실패: '+e.message}
 }
+
+let parsedResult = {};
+
+window.analyzePhoto = async function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const apiKey = localStorage.getItem('claude_api_key')||'';
+  if (!apiKey) {
+    alert('설정에서 Claude API Key를 먼저 입력해주세요.');
+    input.value = '';
+    return;
+  }
+  const msg = document.getElementById('analyzeMsg');
+  const resultDiv = document.getElementById('analyzeResult');
+  resultDiv.style.display = 'none';
+  msg.textContent = '사진 분석 중... (10~20초 소요)';
+
+  try {
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': localStorage.getItem('claude_api_key')||'',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 1024,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: file.type, data: base64 }
+            },
+            {
+              type: 'text',
+              text: `이 근무표 사진을 분석해서 각 조별 현장 배치를 JSON으로 알려주세요.
+조는 1,2,3,5,6,7,8,9,10,11조가 있고
+현장은 성우,대양,제이,씨월드,자동차,삼호철판,쌀,지원,참치,대불,당직,비번 중 하나입니다.
+날짜도 파악해주세요.
+
+반드시 아래 JSON 형식으로만 답하세요 (다른 말 없이):
+{"date":"2026-06-25","assignments":{"1":"성우","2":"대양","3":"비번","5":"씨월드","6":"자동차","7":"삼호철판","8":"쌀","9":"지원","10":"참치","11":"대불"}}`
+            }
+          ]
+        }]
+      })
+    });
+
+    const json = await resp.json();
+    const text = json.content[0].text.trim();
+    parsedResult = JSON.parse(text);
+
+    const date = parsedResult.date || '';
+    const assignments = parsedResult.assignments || {};
+    let html = `<div style="font-weight:600;margin-bottom:6px">📅 ${date}</div>`;
+    Object.entries(assignments).forEach(([cho, site]) => {
+      html += `<div style="padding:3px 0;border-bottom:0.5px solid #eee">${cho}조 → <b>${site}</b></div>`;
+    });
+    document.getElementById('resultList').innerHTML = html;
+    resultDiv.style.display = 'block';
+    msg.textContent = '분석 완료! 결과를 확인하고 적용하세요.';
+  } catch(e) {
+    msg.textContent = '분석 실패: ' + e.message;
+    console.error(e);
+  }
+  input.value = '';
+};
+
+window.applyResult = function() {
+  const date = parsedResult.date;
+  const assignments = parsedResult.assignments || {};
+  if (!date) { alert('날짜 정보가 없어요.'); return; }
+  Object.entries(assignments).forEach(([cho, site]) => {
+    data[`${cho}_${site}`] = date;
+  });
+  document.getElementById('dateInput').value = date;
+  document.getElementById('analyzeResult').style.display = 'none';
+  document.getElementById('analyzeMsg').textContent = '✓ 적용 완료!';
+  setTimeout(() => document.getElementById('analyzeMsg').textContent = '', 3000);
+  renderAll();
+};
 
 loadData();
 </script>
