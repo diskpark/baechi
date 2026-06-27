@@ -20,31 +20,59 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .settings-panel label{font-size:12px;color:#666;display:block;margin-bottom:4px}
 .settings-panel input{width:100%;font-size:14px;padding:9px 12px;border:0.5px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;margin-bottom:10px}
 .settings-panel button{width:100%;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:8px;background:#1a1a1a;color:#fff;cursor:pointer}
+
+/* 상단 요약 */
+.summary-bar{display:flex;gap:8px;margin-bottom:12px}
+.summary-card{flex:1;border-radius:10px;padding:10px 8px;text-align:center}
+.summary-card.red{background:#FCEBEB}
+.summary-card.yellow{background:#FAEEDA}
+.summary-card.green{background:#EAF3DE}
+.summary-card .s-num{font-size:24px;font-weight:700;line-height:1}
+.summary-card.red .s-num{color:#A32D2D}
+.summary-card.yellow .s-num{color:#854F0B}
+.summary-card.green .s-num{color:#3B6D11}
+.summary-card .s-label{font-size:11px;color:#666;margin-top:3px}
+
 .tab-bar{display:flex;border-bottom:0.5px solid #ddd;margin-bottom:12px}
-.tab{flex:1;text-align:center;padding:10px 4px;font-size:14px;cursor:pointer;color:#888;border-bottom:2px solid transparent}
+.tab{flex:1;text-align:center;padding:10px 4px;font-size:13px;cursor:pointer;color:#888;border-bottom:2px solid transparent}
 .tab.active{color:#1a1a1a;border-bottom:2px solid #1a1a1a;font-weight:500}
 .section{display:none}
 .section.active{display:block}
+
+/* 표 보기 */
 .matrix-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .matrix{width:100%;border-collapse:collapse;font-size:11px}
 .matrix th{background:#f0f0f0;padding:7px 3px;text-align:center;font-weight:500;font-size:10px;color:#666;border:0.5px solid #ddd;white-space:nowrap}
 .matrix td{padding:5px 2px;text-align:center;border:0.5px solid #ddd;font-size:10px;white-space:nowrap;background:#fff}
 .matrix td.rh{background:#f0f0f0;font-weight:500;font-size:11px;color:#1a1a1a;padding:5px 6px}
+
+/* 카드 보기 */
 .card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .site-card{background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:8px}
 .site-card.bibun{background:#fafafa}
-.site-name{font-size:12px;font-weight:600;color:#1a1a1a;margin-bottom:5px;border-bottom:0.5px solid #eee;padding-bottom:4px}
+.site-card.urgent{border:1.5px solid #e53e3e;background:#fff9f9}
+.site-name{font-size:12px;font-weight:600;color:#1a1a1a;margin-bottom:5px;border-bottom:0.5px solid #eee;padding-bottom:4px;display:flex;align-items:center;gap:3px}
 .site-name.bibun{color:#999}
+.urgent-dot{width:6px;height:6px;background:#e53e3e;border-radius:50%;display:inline-block;flex-shrink:0}
 .card-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;color:#666}
-.dg{background:#EAF3DE;color:#3B6D11;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
-.dy{background:#FAEEDA;color:#854F0B;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
-.dr{background:#FCEBEB;color:#A32D2D;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:500}
-.dn{background:#f0f0f0;color:#999;padding:2px 6px;border-radius:6px;font-size:10px}
-.db{background:#f0f0f0;color:#aaa;padding:2px 6px;border-radius:6px;font-size:10px}
+
+/* 조별 요약 카드 */
+.cho-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cho-summary-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:12px}
+.cho-summary-card .cho-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.cho-summary-card .cho-last{font-size:12px;color:#666;margin-bottom:6px}
+.cho-summary-card .cho-last span{font-weight:600;color:#1a1a1a}
+.cho-summary-card .cho-badge-wrap{margin-top:4px}
+
+/* 배지 - 더 크고 굵게 */
+.dg{background:#EAF3DE;color:#3B6D11;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.dy{background:#FAEEDA;color:#854F0B;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.dr{background:#FCEBEB;color:#A32D2D;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.dn{background:#f0f0f0;color:#999;padding:3px 8px;border-radius:6px;font-size:11px}
+.db{background:#f0f0f0;color:#aaa;padding:3px 8px;border-radius:6px;font-size:11px}
+
+/* 입력 */
 .input-section{margin-top:16px;border-top:0.5px solid #ddd;padding-top:14px}
-.lock-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.lock-bar input{flex:1;font-size:14px;padding:9px 12px;border:0.5px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a}
-.lock-bar button{padding:9px 16px;font-size:13px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer;white-space:nowrap}
 .unlocked{display:none}
 .unlocked.show{display:block}
 .date-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
@@ -56,6 +84,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .save-btn{width:100%;padding:12px;font-size:15px;font-weight:600;border:none;border-radius:12px;background:#1a1a1a;color:#fff;cursor:pointer;margin-top:12px}
 .save-btn:active{background:#333}
 .save-msg{font-size:12px;color:#888;text-align:center;margin-top:8px;min-height:16px}
+
+/* 팝업 */
 .popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:flex-start;justify-content:center;padding-top:80px;z-index:100}
 .popup-overlay.show{display:flex}
 .popup-box{background:#fff;border-radius:16px;width:92%;max-width:340px;overflow:hidden;max-height:80vh;display:flex;flex-direction:column}
@@ -74,21 +104,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.17</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.18</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
+
   <div class="settings-panel" id="settingsPanel">
     <label>관리자 비밀번호</label>
     <input type="password" id="pwInput" placeholder="비밀번호 입력" />
     <button onclick="checkPw()">확인</button>
-
   </div>
   <div class="sync-msg" id="syncMsg"></div>
+
+  <!-- 상단 요약 -->
+  <div class="summary-bar">
+    <div class="summary-card red">
+      <div class="s-num" id="sumRed">0</div>
+      <div class="s-label">🔴 긴급 (8일+)</div>
+    </div>
+    <div class="summary-card yellow">
+      <div class="s-num" id="sumYellow">0</div>
+      <div class="s-label">🟡 주의 (5~7일)</div>
+    </div>
+    <div class="summary-card green">
+      <div class="s-num" id="sumGreen">0</div>
+      <div class="s-label">🟢 양호 (1~4일)</div>
+    </div>
+  </div>
 
   <div class="tab-bar">
     <div class="tab active" onclick="switchTab('table')">표 보기</div>
     <div class="tab" onclick="switchTab('card')">카드 보기</div>
+    <div class="tab" onclick="switchTab('cho')">조별 보기</div>
   </div>
 
   <div class="section active" id="sec-table">
@@ -96,6 +143,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="section" id="sec-card">
     <div class="card-grid" id="cardGrid"></div>
+  </div>
+  <div class="section" id="sec-cho">
+    <div class="cho-summary-grid" id="choGrid2"></div>
   </div>
 
   <div class="input-section">
@@ -163,6 +213,33 @@ function badge(diff,site){
 
 function getLast(cho,site){return data[`${cho}_${site}`]||null}
 
+// 현장별 가장 오래된 조 날짜
+function getSiteMaxDiff(site){
+  let max=null;
+  CHO.forEach(c=>{
+    const d=dayDiff(getLast(c,site));
+    if(d!==null&&(max===null||d>max)) max=d;
+  });
+  return max;
+}
+
+// 상단 요약 업데이트
+function updateSummary(){
+  let red=0,yellow=0,green=0;
+  CHO.forEach(c=>{
+    SITES.filter(s=>s!=='비번').forEach(s=>{
+      const d=dayDiff(getLast(c,s));
+      if(d===null) return;
+      if(d>=8) red++;
+      else if(d>=5) yellow++;
+      else if(d>=1) green++;
+    });
+  });
+  document.getElementById('sumRed').textContent=red;
+  document.getElementById('sumYellow').textContent=yellow;
+  document.getElementById('sumGreen').textContent=green;
+}
+
 function renderMatrix(){
   let h='<tr><th>조</th>';
   SITES.forEach(s=>h+=`<th>${s}</th>`);
@@ -175,38 +252,78 @@ function renderMatrix(){
   document.getElementById('matrixTable').innerHTML=h;
 }
 
-let cardOrder = JSON.parse(localStorage.getItem('card_order')||'null') || [...SITES];
-
-function saveCardOrder(){
-  localStorage.setItem('card_order', JSON.stringify(cardOrder));
-}
-
 function renderCards(){
   const grid=document.getElementById('cardGrid');
   grid.innerHTML='';
-  cardOrder.forEach(s=>{
+
+  // 긴급(D+8↑) 현장 먼저 정렬
+  const sorted=[...SITES].sort((a,b)=>{
+    if(a==='비번') return 1;
+    if(b==='비번') return -1;
+    const da=getSiteMaxDiff(a)??-1;
+    const db2=getSiteMaxDiff(b)??-1;
+    return db2-da;
+  });
+
+  sorted.forEach(s=>{
     const isBibun=s==='비번';
+    const maxDiff=getSiteMaxDiff(s);
+    const isUrgent=maxDiff!==null&&maxDiff>=8&&!isBibun;
     const card=document.createElement('div');
-    card.className='site-card'+(isBibun?' bibun':'');
-    card.dataset.site=s;
-    let inner=`<div class="site-name${isBibun?' bibun':''}">${s}</div>`;
+    card.className='site-card'+(isBibun?' bibun':'')+(isUrgent?' urgent':'');
+    let inner=`<div class="site-name${isBibun?' bibun':''}">`;
+    if(isUrgent) inner+=`<span class="urgent-dot"></span>`;
+    inner+=`${s}</div>`;
     CHO.forEach(c=>inner+=`<div class="card-row"><span>${c}조</span>${badge(dayDiff(getLast(c,s)),s)}</div>`);
     card.innerHTML=inner;
     grid.appendChild(card);
   });
 }
 
+// 조별 요약 보기
+function renderChoSummary(){
+  const grid=document.getElementById('choGrid2');
+  grid.innerHTML='';
+  CHO.forEach(c=>{
+    // 가장 최근 현장
+    let lastSite=null,lastDate=null;
+    SITES.filter(s=>s!=='비번').forEach(s=>{
+      const d=data[`${c}_${s}`];
+      if(d&&(!lastDate||d>lastDate)){lastDate=d;lastSite=s;}
+    });
+    // 가장 오래된 현장 (다음 배정 후보)
+    let oldestSite=null,oldestDiff=-1;
+    SITES.filter(s=>s!=='비번').forEach(s=>{
+      const d=dayDiff(getLast(c,s));
+      if(d!==null&&d>oldestDiff){oldestDiff=d;oldestSite=s;}
+    });
 
-function renderChoGrid(){
-  document.getElementById('choGrid').innerHTML=CHO.map(c=>`<button class="cho-btn" onclick="openPopup(${c})">${c}조</button>`).join('');
+    const card=document.createElement('div');
+    card.className='cho-summary-card';
+    card.innerHTML=`
+      <div class="cho-title">${c}조</div>
+      <div class="cho-last">최근: <span>${lastSite||'-'}</span></div>
+      <div class="cho-last">추천: <span style="color:#A32D2D">${oldestSite||'-'}</span></div>
+      <div class="cho-badge-wrap">${badge(oldestDiff>=0?oldestDiff:null, oldestSite||'')}</div>
+    `;
+    grid.appendChild(card);
+  });
 }
 
-function renderAll(){renderMatrix();renderCards()}
+function renderAll(){
+  renderMatrix();
+  renderCards();
+  renderChoSummary();
+  updateSummary();
+}
 
 window.switchTab=function(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&t==='table')||(i===1&&t==='card')));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',
+    (i===0&&t==='table')||(i===1&&t==='card')||(i===2&&t==='cho')
+  ));
   document.getElementById('sec-table').classList.toggle('active',t==='table');
   document.getElementById('sec-card').classList.toggle('active',t==='card');
+  document.getElementById('sec-cho').classList.toggle('active',t==='cho');
 }
 
 window.toggleSettings=function(){
@@ -217,7 +334,8 @@ window.checkPw=function(){
   if(document.getElementById('pwInput').value===PW){
     document.getElementById('unlockedArea').classList.add('show');
     document.getElementById('dateInput').value=today();
-    renderChoGrid();
+    document.getElementById('choGrid').innerHTML=CHO.map(c=>`<button class="cho-btn" onclick="openPopup(${c})">${c}조</button>`).join('');
+    document.getElementById('settingsPanel').classList.remove('show');
   } else alert('비밀번호가 틀렸습니다.');
 }
 
