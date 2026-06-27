@@ -50,10 +50,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .site-card{background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:8px}
 .site-card.bibun{background:#fafafa}
-.site-card.urgent{border:1.5px solid #e53e3e;background:#fff9f9}
-.site-name{font-size:12px;font-weight:600;color:#1a1a1a;margin-bottom:5px;border-bottom:0.5px solid #eee;padding-bottom:4px;display:flex;align-items:center;gap:3px}
+.site-name{font-size:12px;font-weight:600;color:#1a1a1a;margin-bottom:5px;border-bottom:0.5px solid #eee;padding-bottom:4px}
 .site-name.bibun{color:#999}
-.urgent-dot{width:6px;height:6px;background:#e53e3e;border-radius:50%;display:inline-block;flex-shrink:0}
 .card-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;color:#666}
 
 /* 조별 요약 카드 */
@@ -104,7 +102,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v1.19</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v1.20</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
@@ -271,25 +269,11 @@ function renderMatrix(){
 function renderCards(){
   const grid=document.getElementById('cardGrid');
   grid.innerHTML='';
-
-  // 긴급(D+8↑) 현장 먼저 정렬
-  const sorted=[...SITES].sort((a,b)=>{
-    if(a==='비번') return 1;
-    if(b==='비번') return -1;
-    const da=getSiteMaxDiff(a)??-1;
-    const db2=getSiteMaxDiff(b)??-1;
-    return db2-da;
-  });
-
-  sorted.forEach(s=>{
+  SITES.forEach(s=>{
     const isBibun=s==='비번';
-    const maxDiff=getSiteMaxDiff(s);
-    const isUrgent=maxDiff!==null&&maxDiff>=8&&!isBibun;
     const card=document.createElement('div');
-    card.className='site-card'+(isBibun?' bibun':'')+(isUrgent?' urgent':'');
-    let inner=`<div class="site-name${isBibun?' bibun':''}">`;
-    if(isUrgent) inner+=`<span class="urgent-dot"></span>`;
-    inner+=`${s}</div>`;
+    card.className='site-card'+(isBibun?' bibun':'');
+    let inner=`<div class="site-name${isBibun?' bibun':''}">${s}</div>`;
     CHO.forEach(c=>inner+=`<div class="card-row"><span>${c}조</span>${badge(dayDiff(getLast(c,s)),s)}</div>`);
     card.innerHTML=inner;
     grid.appendChild(card);
