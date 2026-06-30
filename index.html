@@ -117,7 +117,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* 팝업 */
 .popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:flex-start;justify-content:center;padding-top:60px;z-index:100}
 .popup-overlay.show{display:flex}
-.popup-box{background:#1a1a24;border:0.5px solid #2a2a35;border-radius:16px;width:94%;max-width:380px;overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
+.popup-box{background:#1a1a24;border:0.5px solid #2a2a35;border-radius:16px;width:94%;max-width:380px;max-height:88vh;display:flex;flex-direction:column}
 .popup-header{padding:14px 16px;border-bottom:0.5px solid #2a2a35;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .popup-header span{font-size:17px;font-weight:600;color:#fff}
 .popup-close{background:none;border:none;font-size:24px;color:#555;cursor:pointer;line-height:1;padding:0}
@@ -125,15 +125,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .popup-history-title{font-size:11px;color:#555;margin-bottom:6px}
 .popup-history-row{display:flex;justify-content:space-between;font-size:11px;color:#666;padding:2px 0}
 .popup-history-row span:last-child{color:#888}
-.popup-list{padding:8px;display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.popup-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:9px 10px;cursor:pointer;border-radius:8px;border:0.5px solid #2a2a35}
+.popup-list{padding:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;overflow-y:auto}
+.popup-item{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:7px 6px;cursor:pointer;border-radius:8px;border:0.5px solid #2a2a35}
 .popup-item:active{background:#2a2a35}
 .popup-item.bibun-item .snm{color:#444}
 .popup-item .snm{font-size:13px;color:#ccc}
 .popup-item.longest{border-color:#fbbf24}
 .popup-item.longest .snm{color:#fff;font-weight:600}
 .popup-item.selected{background:#16324a;border-color:#1a73e8}
-.popup-item.jiwon{grid-column:1/3;background:#1f1a0a;border-color:#fbbf24}
+.popup-item.jiwon{grid-column:1/4;background:#1f1a0a;border-color:#fbbf24}
 .popup-item.jiwon .snm{color:#fbbf24;font-weight:600}
 .popup-item.jiwon.selected{background:#2a2410;border-color:#1a73e8}
 .popup-item .row-top{display:flex;align-items:center;justify-content:space-between;width:100%}
@@ -147,7 +147,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="wrap">
   <div class="top-bar">
-    <span class="app-title">현장배치 현황판<span class="version-badge">v2.4</span></span>
+    <span class="app-title">현장배치 현황판<span class="version-badge">v2.5</span></span>
     <button class="settings-btn" onclick="toggleSettings()" aria-label="설정"><i class="ti ti-settings"></i></button>
   </div>
   <div class="sub-title">근무 배치 참고용 현황</div>
